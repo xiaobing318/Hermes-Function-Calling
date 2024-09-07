@@ -2,33 +2,38 @@
 
 This repository contains code for the Hermes Pro Large Language Model to perform function calling based on the provided schema. It allows users to query the model and retrieve information related to stock prices, company fundamentals, financial statements, and more.
 
-## Installation
+该存储库包含 Hermes Pro 大型语言模型的代码，用于根据提供的模式（schema）执行函数调用。它允许用户查询模型并检索与股票价格、公司基本面、财务报表等相关的信息。
 
-To install the required packages, run the following command:
+## Installation（安装）
+
+To install the required packages, run the following command（为了安装需要的packages，运行下列的command）:
 
 ```bash
+# 使用python中的pip包安装requirement.txt中指定的packages
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage（使用）
 ### Function calling
 
-To run the function call inference with a query, use the following command:
+To run the function call inference with a query, use the following command（为了使用一个query来运行函数调用inference，使用下列的command）:
 
 ```bash
+# 使用python解释器运行functioncall.py代码，参数--query用来指定需要查询的问题
 python functioncall.py --query "I need the current stock price of Tesla (TSLA)"
 ```
 
 ### Json mode
 
-To run the json mode inference with a query, use the following command:
+To run the json mode inference with a query, use the following command（为了使用一个query来运行json mode inference，使用下列的command）:
 
 ```bash
+# 使用python解释器运行jsonmode.py，参数query用来指定需要查询的prompt
 python jsonmode.py --query "Please return a json object to represent Goku from the anime Dragon Ball Z?"
 
 ```
 
-#### Command Line Arguments
+#### Command Line Arguments（命令行参数）
 
 - `--model_path`: Path to the model folder (default: "NousResearch/Hermes-2-Pro-Llama-3-8B").
 - `--chat_template`: Chat template for prompt formatting (default: "chatml").
@@ -37,11 +42,11 @@ python jsonmode.py --query "Please return a json object to represent Goku from t
 - `--query`: Query to be used for function call inference (default: "I need the current stock price of Tesla (TSLA)").
 - `--max_depth`: Maximum number of recursive iterations (default: 5).
 
-## Adding Custom Functions
+## Adding Custom Functions（添加自定义函数）
 
-To add your own functions for the model to use, you can modify the `functions.py` script. This script contains various functions that retrieve stock-related information using the `yfinance` library.
+To add your own functions for the model to use, you can modify the `functions.py` script. This script contains various functions that retrieve stock-related information using the `yfinance` library.（为了能够添加你自己的函数从而使用model，你可以修改functions.py脚本。这个脚本中包含不同的functions，这些functions可以检索股票相关的信息。）
 
-Here's an example of how to add a new function:
+Here's an example of how to add a new function（这里是一个如何添加新函数的例子）:
 
 ```python
 @tool
@@ -198,7 +203,7 @@ You are a function calling AI model. You are provided with function signatures w
 ```
 
 Hermes-3 tool-use template:
-- <scratch_pad> can be enabled with Goal Oriented Action Planning (GOAP) reasoning framework
+- <scratch_pad> can be enabled with Goal Oriented Action Planning (GOAP) reasoning framework（<scratch_pad> 可以启用目标导向行动计划 (GOAP) 推理框架）
 - Goal section would restate user request
 - Actions block contains python style function calls
 - Observation block would have tool results summarized when provided
