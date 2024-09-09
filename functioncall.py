@@ -1,17 +1,22 @@
+# 添加第三方库argparse：用来处理命令行参数相关的内容
 import argparse
+# 添加第三方库torch：用来处理LLM模型相关的内容
 import torch
+# 添加第三方库json：用来处理JSON相关的内容
 import json
-
+# 添加第三方库transformers中的AutoModelForCausalLM、AutoTokenizer、BitsAndBytesConfig类
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     BitsAndBytesConfig
 )
-
+# 添加第三方库functions
 import functions
+# 从第三方库prompter中导入PromptManager类
 from prompter import PromptManager
+# 从第三方库validator中导入validate_function_call_schema类
 from validator import validate_function_call_schema
-
+# 从utils中导入多个函数
 from utils import (
     print_nous_text_art,
     inference_logger,
@@ -20,7 +25,28 @@ from utils import (
     validate_and_extract_tool_calls
 )
 
+
+# 定义名为ModelInference的类：这个类的作用就是用来model inference
 class ModelInference:
+    """
+    一、ModelInference类的属性成员
+        1. `prompter`: 管理对话提示的对象，负责生成对话模板。
+        2. `bnb_config`: 配置量化参数，用于控制模型的量化操作。
+        3. `model`: 加载的预训练语言生成模型（AutoModelForCausalLM）。
+        4. `tokenizer`: 对应模型的分词器，用于文本的分词和编码。
+    二、ModelInference类的方法成员
+        1. `__init__(self, model_path, chat_template, load_in_4bit)`: 构造函数，初始化模型、分词器和配置。
+           - **作用**: 加载和配置模型及其分词器，设置量化参数。
+        2. `process_completion_and_validate(self, completion, chat_template)`: 处理模型生成的文本并验证其中的工具调用。
+           - **作用**: 解析模型回答，验证工具调用是否符合预期，并处理错误信息。
+        3. `execute_function_call(self, tool_call)`: 执行从文本中解析出的工具调用。
+           - **作用**: 调用指定的函数，并处理返回结果。
+        4. `run_inference(self, prompt)`: 对给定的提示文本执行模型推理。
+           - **作用**: 使用模型生成对话回答。
+        5. `generate_function_call(self, query, chat_template, num_fewshot, max_depth)`: 根据用户查询生成功能调用并递归处理。
+           - **作用**: 管理整个生成和处理对话的流程，包括递归生成和执行功能调用。
+    """
+    # ModelInference类的构造函数
     def __init__(self, model_path, chat_template, load_in_4bit):
         inference_logger.info(print_nous_text_art())
         self.prompter = PromptManager()
@@ -159,6 +185,8 @@ class ModelInference:
         except Exception as e:
             inference_logger.error(f"Exception occurred: {e}")
             raise e
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run recursive function calling loop")
