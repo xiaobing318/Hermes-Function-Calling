@@ -1,13 +1,23 @@
+# `re` 模块提供正则表达式支持，用于字符串的搜索、替换和解析。正则表达式是用于匹配字符串中字符组合的模式。
 import re
+# `inspect` 模块用于检查（或检视）活跃的对象，如函数、类、方法、模块等，可以获取这些对象的信息，如源码、变量名、注释等。
 import inspect
+# `requests` 是一个用于发送 HTTP 请求的库。它是 Python 最常用的网络请求库之一，使发送网络请求变得简洁明了。
 import requests
+# `pandas` 是一个强大的数据分析和操作库，提供高性能、易用的数据结构和数据分析工具，尤其适合处理表格数据（如 CSV 文件）。
 import pandas as pd
+# `yfinance` 库提供了一个易于使用的方法来获取雅虎财经的市场数据。用户可以下载历史市场数据、实时数据等。
 import yfinance as yf
+# `concurrent.futures` 模块提供了一个高级接口，用于异步执行可调用对象。这个模块使得线程或进程的使用和管理变得更加简单。
 import concurrent.futures
 
+# `typing` 模块支持 Python 类型标注，用于在代码中添加变量类型提示。`List` 是一个类型类，用于指示变量应为列表类型。
 from typing import List
+# `BeautifulSoup` 是一个用于解析 HTML 和 XML 文档的库，常用于网页抓取。它创建一个解析树以便提取 XML 和 HTML 标签的数据。
 from bs4 import BeautifulSoup
+# 这可能是一个自定义的日志记录器，用于记录推理或其他运行时信息。具体功能取决于 `utils` 模块的实现细节。
 from utils import inference_logger
+# 这些模块和函数看起来是 `langchain` 库的一部分，可能与自然语言处理或链式工具调用有关。`tool` 可能是用于定义工具的装饰器或类，而 `convert_to_openai_tool` 可能是将某些功能转换为兼容 OpenAI 格式的工具的函数。
 from langchain.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
