@@ -1,25 +1,23 @@
 ```python
-import matplotlib.pyplot as plt
-import numpy as np
+import yfinance as yf
+def get_current_stock_price(symbol: str) -> float:
+  """
+  Get the current stock price for a given symbol.
 
+  Args:
+    symbol (str): The stock symbol.
 
-"""
-绘制函数 f(x) = x^2 的图像。
-"""
-# 创建 x 值的范围：从 -10 到 10，总共 400 个点
-x = np.linspace(-10, 10, 400)
-# 计算每个 x 点的 f(x)
-y = x ** 2
+  Returns:
+    float: The current stock price, or None if an error occurs.
+  """
+  try:
+    stock = yf.Ticker(symbol)
+    # Use "regularMarketPrice" for regular market hours, or "currentPrice" for pre/post market
+    current_price = stock.info.get("regularMarketPrice", stock.info.get("currentPrice"))
+    return current_price if current_price else None
+  except Exception as e:
+    print(f"Error fetching current price for {symbol}: {e}")
+    return None
 
-# 创建图形和轴
-fig, ax = plt.subplots()
-# 绘制 x 和 y
-ax.plot(x, y)
-
-# 设置图表标题和轴标签
-ax.set_title("$f(x) = x^2$")
-ax.set_xlabel("x")
-ax.set_ylabel("f(x)")
-# 显示图像
-plt.show()
+get_current_stock_price("apple")
 ```
