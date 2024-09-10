@@ -24,41 +24,41 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 @tool
 def code_interpreter(code_markdown: str) -> dict | str:
     """
-    Execute the provided Python code string on the terminal using exec.
+    Execute the provided Python code string on the terminal using exec.（在终端执行提供的 Python 代码字符串，使用 exec 方法。）
 
-    The string should contain valid, executable and pure Python code in markdown syntax.
-    Code should also import any required Python packages.
+    The string should contain valid, executable and pure Python code in markdown syntax.（字符串应包含有效的、可执行的、纯 Python 代码，并使用 markdown 语法。）
+    Code should also import any required Python packages.（代码中也应导入任何必要的 Python 包。）
 
     Args:
-        code_markdown (str): The Python code with markdown syntax to be executed.
+        code_markdown (str): The Python code with markdown syntax to be executed.（要执行的带有 markdown 语法的 Python 代码。）
             For example: ```python\n<code-string>\n```
 
     Returns:
         dict | str: A dictionary containing variables declared and values returned by function calls,
-            or an error message if an exception occurred.
+            or an error message if an exception occurred.（包含声明的变量和函数调用结果的字典，或者如果发生异常，则返回错误信息。）
 
     Note:
-        Use this function with caution, as executing arbitrary code can pose security risks.
+        Use this function with caution, as executing arbitrary code can pose security risks.（使用此函数时要小心，因为执行任意代码可能存在安全风险。）
     """
     try:
-        # Extracting code from Markdown code block
+        # Extracting code from Markdown code block（从 Markdown 代码块中提取代码）
         code_lines = code_markdown.split('\n')[1:-1]
         code_without_markdown = '\n'.join(code_lines)
 
-        # Create a new namespace for code execution
+        # Create a new namespace for code execution（为代码执行创建一个新的命名空间）
         exec_namespace = {}
 
-        # Execute the code in the new namespace
+        # Execute the code in the new namespace（在新的命名空间中执行代码）
         exec(code_without_markdown, exec_namespace)
 
-        # Collect variables and function call results
+        # Collect variables and function call results（收集变量和函数调用结果）
         result_dict = {}
         for name, value in exec_namespace.items():
             if callable(value):
                 try:
                     result_dict[name] = value()
                 except TypeError:
-                    # If the function requires arguments, attempt to call it with arguments from the namespace
+                    # If the function requires arguments, attempt to call it with arguments from the namespace（# 如果函数需要参数，尝试使用命名空间中的参数调用它）
                     arg_names = inspect.getfullargspec(value).args
                     args = {arg_name: exec_namespace.get(arg_name) for arg_name in arg_names}
                     result_dict[name] = value(**args)
