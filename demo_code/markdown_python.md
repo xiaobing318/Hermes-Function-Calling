@@ -1,23 +1,36 @@
 ```python
-import yfinance as yf
-def get_current_stock_price(symbol: str) -> float:
-  """
-  Get the current stock price for a given symbol.
+import numpy as np
 
-  Args:
-    symbol (str): The stock symbol.
+def matrix_multiply(matrix_a, matrix_b):
+    """
+    计算两个矩阵的乘法。
 
-  Returns:
-    float: The current stock price, or None if an error occurs.
-  """
-  try:
-    stock = yf.Ticker(symbol)
-    # Use "regularMarketPrice" for regular market hours, or "currentPrice" for pre/post market
-    current_price = stock.info.get("regularMarketPrice", stock.info.get("currentPrice"))
-    return current_price if current_price else None
-  except Exception as e:
-    print(f"Error fetching current price for {symbol}: {e}")
-    return None
+    参数:
+    matrix_a (np.ndarray): 第一个矩阵。
+    matrix_b (np.ndarray): 第二个矩阵。
 
-get_current_stock_price("apple")
+    返回:
+    np.ndarray: 结果矩阵。
+    """
+    try:
+        # 使用 numpy 的 dot 函数来计算矩阵乘法
+        return np.dot(matrix_a, matrix_b)
+    except ValueError as e:
+        # 如果矩阵维度不匹配，则抛出错误
+        print(f"Error: {e}")
+
+
+# 定义两个矩阵
+matrix_a = np.array([[1, 2], [3, 4]])
+matrix_b = np.array([[2, 0], [1, 2]])
+# 计算乘积
+result = matrix_multiply(matrix_a, matrix_b)
+# 输出结果
+if result is not None:
+    print("矩阵 A:")
+    print(matrix_a)
+    print("矩阵 B:")
+    print(matrix_b)
+    print("矩阵乘积 A * B:")
+    print(result)
 ```
