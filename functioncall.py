@@ -10,7 +10,7 @@ from transformers import (
     AutoTokenizer,
     BitsAndBytesConfig
 )
-# 添加第三方库functions
+# 添加当前项目中的functions
 import functions
 # 从第三方库prompter中导入PromptManager类
 from prompter import PromptManager
