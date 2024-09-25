@@ -15,7 +15,7 @@ import concurrent.futures
 from typing import List
 # `BeautifulSoup` 是一个用于解析 HTML 和 XML 文档的库，常用于网页抓取。它创建一个解析树以便提取 XML 和 HTML 标签的数据。
 from bs4 import BeautifulSoup
-# 这可能是一个自定义的日志记录器，用于记录推理或其他运行时信息。具体功能取决于 `utils` 模块的实现细节。
+# 这是一个自定义的日志记录器，用于记录推理或其他运行时信息，具体功能取决于 `utils` 模块的实现细节（从当前文件所在的文件夹中获取对应的类）。
 from utils import inference_logger
 # 这些模块和函数看起来是 `langchain` 库的一部分，可能与自然语言处理或链式工具调用有关。`tool` 可能是用于定义工具的装饰器或类，而 `convert_to_openai_tool` 可能是将某些功能转换为兼容 OpenAI 格式的工具的函数。
 from langchain.tools import tool
@@ -305,6 +305,29 @@ def get_company_profile(symbol: str) -> dict:
         print(f"Error fetching company profile for {symbol}: {e}")
         return {}
 
+"""
+- **输入：** 在这个调用示例中，`get_openai_tools()` **不需要任何输入参数**。调用时无需传递任何参数，因为函数内部已经定义了需要转换的功能列表。
+- **输出：** 函数返回一个 **包含多个字典的列表**，每个字典代表一个 OpenAI 工具。假设 `code_interpreter` 函数被成功转换，输出的一个字典可能如
+下所示：
+```python
+{
+    "name": "code_interpreter",
+    "description": "Executes and interprets code snippets.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "code": {
+                "type": "string",
+                "description": "The code snippet to execute."
+            }
+        },
+        "required": ["code"]
+    }
+}
+```
+    这个字典描述了一个名为 `code_interpreter` 的工具，其功能是执行和解释代码片段。类似地，列表中的其他字典将对应于 `google_search_and_scrape`、
+`get_current_stock_price` 等其他工具，每个工具都有其名称、描述和参数定义。
+"""
 def get_openai_tools() -> List[dict]:
     functions = [
         code_interpreter,
