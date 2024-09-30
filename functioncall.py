@@ -10,13 +10,13 @@ from transformers import (
     AutoTokenizer,
     BitsAndBytesConfig
 )
-# 添加当前项目中的functions
+# 添加当前项目中的functions.py文件
 import functions
 # 从第三方库prompter中导入PromptManager类
 from prompter import PromptManager
 # 从第三方库validator中导入validate_function_call_schema类
 from validator import validate_function_call_schema
-# 从utils中导入多个函数
+# 从当前项目中的utils.py文件中导入多个函数
 from utils import (
     print_nous_text_art,
     inference_logger,
@@ -46,18 +46,22 @@ class ModelInference:
         5. `generate_function_call(self, query, chat_template, num_fewshot, max_depth)`: 根据用户查询生成功能调用并递归处理。
            - **作用**: 管理整个生成和处理对话的流程，包括递归生成和执行功能调用。
     """
-    # ModelInference类的构造函数
+    # ModelInference类的构造函数（初始化、配置一些相关信息）
     def __init__(self, model_path, chat_template, load_in_4bit):
+        # 使用当前项目中的utils.py文件中的函数用来记录一些文本字符串
         inference_logger.info(print_nous_text_art())
+        # 类中的一个成员变量
         self.prompter = PromptManager()
+        # 类中的一个成员变量
         self.bnb_config = None
-
+        # 如果变量为真，那么创建一个成员变量
         if load_in_4bit == "True":
             self.bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
             )
+        # 创建一个成员变量，这个成员变量的作用就是LLM模型
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path,
             trust_remote_code=True,
@@ -67,27 +71,42 @@ class ModelInference:
             attn_implementation="flash_attention_2",
             device_map="auto",
         )
-
+        # 创建一个成员变量通过多个设置来配置tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.padding_side = "left"
 
+        # 如果tokenizer的chat template是空的，那么将会尝试从指定的文件中读取chat template
         if self.tokenizer.chat_template is None:
             print("No chat template defined, getting chat_template...")
             self.tokenizer.chat_template = get_chat_template(chat_template)
         
+        # 使用logger来记录模型配置信息
         inference_logger.info(self.model.config)
         inference_logger.info(self.model.generation_config)
         inference_logger.info(self.tokenizer.special_tokens_map)
 
+    """
+        这个函数的作用就是处理和验证由语言模型生成的文本完成结果（即 `completion`）,它确保生成的文本（`assistant_message`）不仅符合给定的
+    模板（`chat_template`），还要检查并提取其中可能包含的工具调用（如API调用），并验证这些调用是否合法。如果验证通过，函数将返回工具调用信息、
+    经过验证的助理消息和错误消息（如果有的话）。如果生成的消息不符合预期或存在错误，函数将记录警告并抛出异常。
+        当前函数接受两个参数：`completion`（模型生成的文本完成结果）和 `chat_template`（对话模板）。
+    """
     def process_completion_and_validate(self, completion, chat_template):
 
+        # 旨在根据完成结果和模板格式化或解析出正确的助理消息
         assistant_message = get_assistant_message(completion, chat_template, self.tokenizer.eos_token)
-
+        # 如果 `assistant_message`不是空值，则执行代码块中的内容 
         if assistant_message:
+            """
+                调用 `validate_and_extract_tool_calls` 函数，传入 `assistant_message`。此函数用于验证消息中的工具调用并尝试提取这些调用。
+            返回三个值：验证结果（布尔值）、工具调用的详细信息（可能是字典或列表），以及可能的错误消息。
+            """
             validation, tool_calls, error_message = validate_and_extract_tool_calls(assistant_message)
 
+            # 消息中的工具调用是有效的
             if validation:
+                # 使用日志记录器 `inference_logger` 记录信息，显示解析出的工具调用。使用 `json.dumps` 将 `tool_calls` 格式化为更易读的形式
                 inference_logger.info(f"parsed tool calls:\n{json.dumps(tool_calls, indent=2)}")
                 return tool_calls, assistant_message, error_message
             else:
@@ -97,23 +116,38 @@ class ModelInference:
             inference_logger.warning("Assistant message is None")
             raise ValueError("Assistant message is None")
         
+    """
+        根据提供的工具调用（`tool_call`）信息执行指定的函数。函数名称从 `tool_call` 字典中获取，并通过 `getattr` 查找 `functions` 模块中相应的
+    函数对象。然后，它获取工具调用中指定的参数，调用函数，并记录相关的日志信息。函数调用完成后，将函数的响应与其名称打包成一个新的字典，并返回这个字典。
+    接受一个参数 `tool_call`，表示包含函数调用详情的字典。
+    """
     def execute_function_call(self, tool_call):
+        # 从 `tool_call` 字典中获取键 `"name"` 的值，该值是要调用的函数的名称
         function_name = tool_call.get("name")
+        # 使用 `getattr` 尝试从 `functions` 模块中获取名为 `function_name` 的函数对象。如果不存在，返回 `None`（应该就是具体的函数实现）
         function_to_call = getattr(functions, function_name, None)
+        # 从 `tool_call` 字典中获取键 `"arguments"` 的值，该值是一个字典，包含调用函数时所需的参数。如果 `"arguments"` 不存在，则默认为空字典。
         function_args = tool_call.get("arguments", {})
 
+        # 使用日志记录器记录正在调用的函数名称
         inference_logger.info(f"Invoking function call {function_name} ...")
+        # 调用 `function_to_call` 函数，使用 `function_args` 字典的值作为参数，并解包参数列表
         function_response = function_to_call(*function_args.values())
+        # 创建一个新的字典，将函数名称和函数响应打包，格式化为JSON风格的字符串
         results_dict = f'{{"name": "{function_name}", "content": {function_response}}}'
+        # 返回包含函数名称和响应内容的字典
         return results_dict
     
+    # 主要目的是接受一个输入提示（prompt），通过一个NLP模型生成文本响应。
     def run_inference(self, prompt):
+        # 函数首先使用 `tokenizer` 处理输入提示，格式化并转换为模型可以接受的格式（通常是张量）。
         inputs = self.tokenizer.apply_chat_template(
             prompt,
             add_generation_prompt=True,
             return_tensors='pt'
         )
 
+        # 接着，它调用模型的 `generate` 方法以生成响应。这个方法设置了生成的参数，如最大生成长度、温度（控制随机性）、重复惩罚等，以控制生成文本的特性。
         tokens = self.model.generate(
             inputs.to(self.model.device),
             max_new_tokens=1500,
@@ -122,6 +156,7 @@ class ModelInference:
             do_sample=True,
             eos_token_id=self.tokenizer.eos_token_id
         )
+        # 最后，使用 `tokenizer` 解码生成的令牌，转换成人类可读的字符串形式，并返回这个字符串。
         completion = self.tokenizer.decode(tokens[0], skip_special_tokens=False, clean_up_tokenization_space=True)
         return completion
 
